@@ -11,12 +11,35 @@ import {
 	ImageBackground,
 	KeyboardAvoidingView,
 	StatusBar,
+	ScrollView,
 	AsyncStorage,
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import validate from '../../utility/validation';
-
+// import Toast from 'react-native-root-toast';
 export default class login extends Component {
+	// componentDidMount(){
+	// 	let toast = Toast.show('This is a message', {
+	// 		duration: Toast.durations.LONG,
+	// 		position: Toast.positions.BOTTOM,
+	// 		shadow: true,
+	// 		animation: true,
+	// 		hideOnPress: true,
+	// 		delay: 0,
+	// 		onShow: () => {
+	// 			// calls on toast\`s appear animation start
+	// 		},
+	// 		onShown: () => {
+	// 			// calls on toast\`s appear animation end.
+	// 		},
+	// 		onHide: () => {
+	// 			// calls on toast\`s hide animation start.
+	// 		},
+	// 		onHidden: () => {
+	// 			// calls on toast\`s hide animation end.
+	// 		}
+	// 	});
+	// }
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -125,60 +148,65 @@ export default class login extends Component {
 		return (
 			<View style={styles.container}>
 				<StatusBar hidden={true} />
-				<View style={styles.statusBar} />
 				<ImageBackground source={require('../../imgs/bac.png')} style={styles.backgroundImage}>
-					<View style={styles.content}>
-						<KeyboardAvoidingView behavior="padding">
-							<View>
+					<ScrollView style={styles.scrl}>
+						<KeyboardAvoidingView behavior="position">
+							<View style={styles.content}>
 								<Image source={require('../../imgs/logo.png')} style={styles.logo} />
+								<View style={styles.inpContainer}>
+									<TextInput
+										autoFocus={false}
+										underlineColorAndroid="transparent"
+										style={[styles.input, inValidInputf]}
+										placeholder="First Name"
+										keyboardType="default"
+										onChangeText={fname => this._changeTextHandlerFName(fname)}
+										value={this.state.fname}
+										ref={ref => (fNameDataInput = ref)}
+									/>
+									<TextInput
+										autoFocus={false}
+										underlineColorAndroid="transparent"
+										style={[styles.input, inValidInputl]}
+										placeholder="Last Name"
+										keyboardType="default"
+										onChangeText={lname => this._changeTextHandlerLName(lname)}
+										value={this.state.lname}
+										ref={ref => (lNameDataInput = ref)}
+									/>
 
-								<TextInput
-									autoFocus={false}
-									underlineColorAndroid="transparent"
-									style={[styles.input, inValidInputf]}
-									placeholder="First Name"
-									keyboardType="default"
-									onChangeText={fname => this._changeTextHandlerFName(fname)}
-									value={this.state.fname}
-									ref={ref => (fNameDataInput = ref)}
-								/>
-								<TextInput
-									autoFocus={false}
-									underlineColorAndroid="transparent"
-									style={[styles.input, inValidInputl]}
-									placeholder="Last Name"
-									keyboardType="default"
-									onChangeText={lname => this._changeTextHandlerLName(lname)}
-									value={this.state.lname}
-									ref={ref => (lNameDataInput = ref)}
-								/>
-
-								<TextInput
-									autoFocus={false}
-									underlineColorAndroid="transparent"
-									style={[styles.input, inValidInputn]}
-									placeholder="Member Number"
-									onChangeText={memNo => this._changeTextHandlerNumber(memNo)}
-									value={this.state.memNo}
-									ref={component => (this._textInput = component)}
-								/>
-								<TouchableOpacity
-									onPress={this._loginHandler}
-									isDisabled={true}
-									style={styles.buttonContainer}
-								>
-									<Text style={styles.buttonText}>LOGIN</Text>
-								</TouchableOpacity>
+									<TextInput
+										autoFocus={false}
+										underlineColorAndroid="transparent"
+										style={[styles.input, inValidInputn]}
+										placeholder="Member Number"
+										onChangeText={memNo => this._changeTextHandlerNumber(memNo)}
+										value={this.state.memNo}
+										ref={component => (this._textInput = component)}
+									/>
+									<TouchableOpacity
+										onPress={this._loginHandler}
+										isDisabled={true}
+										style={styles.buttonContainer}
+									>
+										<Text style={styles.buttonText}>LOGIN</Text>
+									</TouchableOpacity>
+								</View>
 							</View>
 						</KeyboardAvoidingView>
-					</View>
+					</ScrollView>
 				</ImageBackground>
 			</View>
 		);
 	}
 
 	_loginHandler = () => {
-		if (this.state.memIsValid && this.state.lNameIsValid && this.state.memIsValid && this.state.formData.memNo !=null) {
+		if (
+			this.state.memIsValid &&
+			this.state.lNameIsValid &&
+			this.state.memIsValid &&
+			this.state.formData.memNo != null
+		) {
 			let number = this.state.formData.memNo;
 			console.log(number);
 			baseURL = 'http://dev20.onlinetestingserver.com/sos-new/request-';
@@ -203,15 +231,15 @@ export default class login extends Component {
 						AsyncStorage.setItem('uid', res.u_id);
 						this.props.navigator.resetTo({
 							screen: 'sos.HomeScreen',
-							navigatorStyle: {navBarHidden: true,},
-					})
+							navigatorStyle: { navBarHidden: true },
+						});
 					} else {
 						alert(number + ' is not a valid member');
 						this._textInput.setNativeProps({ text: '' });
 					}
-				}).then(
-					
-				).catch(err => alert(err.message));
+				})
+				.then()
+				.catch(err => alert(err.message));
 		} else if (this.state.memIsValid || this.state.lNameIsValid || this.state.memIsValid) {
 			alert('please fill all the fields ');
 		}
@@ -236,15 +264,18 @@ const styles = StyleSheet.create({
 	content: {
 		flex: 1,
 		padding: 20,
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 		alignItems: 'center',
+	},
+	logoContainer: {
+		flex: 1,
 	},
 	logo: {
 		width: 300,
 		height: 200,
 		resizeMode: Image.resizeMode.contain,
 		marginBottom: 20,
-		marginTop: 0,
+		marginTop: 20,
 	},
 	input: {
 		fontSize: 16,
@@ -275,5 +306,14 @@ const styles = StyleSheet.create({
 	},
 	kbd: {
 		marginBottom: 10,
+	},
+	inpContainer: {
+		flex: 1,
+		alignSelf: 'stretch',
+		marginTop: 20,
+	},
+	scrl: {
+		flex:1,
+		marginTop: 20,
 	},
 });

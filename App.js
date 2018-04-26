@@ -35,3 +35,4 @@ AsyncStorage.getItem('accessToken')
     }).catch(e => {
     console.log(e)
     });
+  
