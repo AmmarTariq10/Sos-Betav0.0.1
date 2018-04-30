@@ -16,10 +16,11 @@ import {
 	AsyncStorage,
 	Button,
 	PermissionsAndroid,
+	NetInfo,
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import Geolocation from 'react-native-geolocation-service';
-import Toast from 'react-native-easy-toast'
+import Toast from 'react-native-easy-toast';
 export default class home extends Component {
 	state = {
 		data: {
@@ -32,22 +33,22 @@ export default class home extends Component {
 		},
 	};
 
-
-		componentWillUnmount(){
-			AsyncStorage.getItem('accessToken');
-			AsyncStorage.getItem('uid');
-			this.setState(prevState => {
-				return {
-					...prevState.data,
-					auth: {
-						token: null,
-						uid: null,
-					},
-				};
-			});
-		}
+	componentWillUnmount() {
+		AsyncStorage.getItem('accessToken');
+		AsyncStorage.getItem('uid');
+		this.setState(prevState => {
+			return {
+				...prevState.data,
+				auth: {
+					token: null,
+					uid: null,
+				},
+			};
+		});
+	}
 	constructor(props) {
 		super(props);
+		console.disableYellowBox = true;
 		this._retrieveInfo();
 	}
 
@@ -59,10 +60,10 @@ export default class home extends Component {
 	componentDidMount() {
 		this._startAnimation();
 		this._locationRequest();
-		
 	}
 
 	render() {
+		StatusBar.setBackgroundColor('#04366a', false);
 		const interpolateColor = this.animatedValue.interpolate({
 			inputRange: [0, 150],
 			outputRange: ['rgba(0, 0, 0,0)', 'rgba(0,0,0,0)'],
@@ -74,39 +75,38 @@ export default class home extends Component {
 
 		return (
 			<View style={styles.container}>
-				<StatusBar hidden={true} />
-				<View style={styles.statusBar} />
-				<ImageBackground source={require('../../imgs/main-bg.jpg')} style={styles.backgroundImage}>
-					<View style={styles.mainHeaderContainer}>
-						<Text style={styles.topTitle}>SOS</Text>
-						<Button style={styles.btn} title="Logout" onPress={this._logout} />
-					</View>
+				<StatusBar backgroundColor="#04366a" barStyle="light-content" />
+				<View style={styles.mainHeaderContainer}>
+					<Text style={styles.topTitle}>SOS</Text>
 
+					<TouchableOpacity style={styles.btn} onPress={this._logout}>
+						<Text style={styles.btnText}> Logout </Text>
+					</TouchableOpacity>
+				</View>
+
+				<ImageBackground source={require('../../imgs/main-bg.jpg')} style={styles.backgroundImage}>
 					<View style={styles.content}>
 						<View style={styles.heyTitleContainer}>
 							<Text style={styles.heytite}>HEY</Text>
 						</View>
 
 						<View style={styles.textContainer}>
-							<Text style={styles.simtext}>
-								Please tap to the button below if you are in danger
-							</Text>
+							<Text style={styles.simtext}>Please tap to the button below if you are in danger</Text>
 						</View>
+						<Toast ref="toast" />
 						<View style={styles.arrowContainer}>
 							<Animated.View style={[animatedStyle]}>
 								<Image source={require('../../imgs/arrow.png')} style={[styles.arrow]} />
 							</Animated.View>
 						</View>
 					</View>
-					<Toast 
-					ref="toast"/>
+
 					<View style={styles.btnContainer}>
 						<TouchableOpacity onPress={this._sosCall} activeOpacity={0.8}>
 							<View style={styles.redbox}>
 								<Image source={require('../../imgs/sos-btn.png')} style={styles.sostxt} />
 							</View>
 						</TouchableOpacity>
-						
 					</View>
 				</ImageBackground>
 			</View>
@@ -114,7 +114,7 @@ export default class home extends Component {
 	}
 
 	_startAnimation() {
-		this._retrieveInfo()
+		this._retrieveInfo();
 		this.animatedValue.setValue(0);
 		Animated.timing(this.animatedValue, {
 			toValue: 100,
@@ -160,15 +160,14 @@ export default class home extends Component {
 		});
 		console.log(this.state);
 		this.props.navigator.resetTo({
-				screen: 'sos.LoginScreen',
-				navigatorStyle: {
-					navBarHidden: true},
+			screen: 'sos.LoginScreen',
+			navigatorStyle: {
+				navBarHidden: true,
+			},
 		});
 	};
 
 	_sosCall = async () => {
-		
-		
 		baseURL = 'http://dev20.onlinetestingserver.com/sos-new/request-';
 		let url = baseURL + 'sos-call';
 		console.log(url);
@@ -186,21 +185,50 @@ export default class home extends Component {
 		console.log(header);
 
 		if (this.state.data.latitude != 0) {
-			fetch(url, {
-				method: 'POST',
-				headers: header,
-				body: body,
-			}, err => {this.refs.toast.show(err)})
-				.then(res => res.json())
-				.then(resp => this.refs.toast.show(JSON.stringify(resp)))
-				.catch(e => this.refs.toast.show(e));
+			NetInfo.isConnected.fetch().then(conn => {
+				if (conn) {
+					fetch(
+						url,
+						{
+							method: 'POST',
+							headers: header,
+							body: body,
+						},
+						err => {
+							this.refs.toast.show(err);
+						}
+					)
+						.then(res => res.json())
+						.then(resp => {
+							this.props.navigator.dismissAllModals({
+								animationType: 'none',
+							});
+							Navigation.showModal({
+								screen: 'sos.messageModal',
+								title: 'SOS',
+								navigatorStyle: {
+									navBarBackgroundColor: '#064f9a',
+									orientation: 'portrait',
+									navBarTextColor: 'white',
+									navBarTextFontSize: 30,
+									navBarButtonColor: 'white',
+									navBarTitleTextCentered: true,
+								},
+								drawUnderStatusBar: false,
+							});
+						})
+						.catch(e => {
+							this.refs.toast.show(e);
+						});
+				} else {
+					this.refs.toast.show('Check network connection');
+				}
+			});
 		} else {
 			this.refs.toast.show('Please Wait while the setup is getting ready');
 			this._locationRequest();
 		}
-
 	};
-
 	_retrieveInfo = async () => {
 		await AsyncStorage.getItem('accessToken')
 			.then(res => {
@@ -232,7 +260,6 @@ export default class home extends Component {
 			.catch(err => {
 				this.refs.toast.show(err.message);
 			});
-		
 	};
 }
 
@@ -240,15 +267,16 @@ const animatedStyle = { opacity: this.animatedValue };
 const styles = StyleSheet.create({
 	mainHeaderContainer: {
 		flexDirection: 'row',
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 		backgroundColor: '#064f9a',
 		alignSelf: 'stretch',
 		padding: 15,
 	},
-
-	heyTitleContainer: {
-		flex: 0.3,
+	btnText: {
+		color: '#fff',
+		fontSize: 18,
 	},
+
 	textContainer: { flex: 1 },
 	arrowContainer: { flex: 1.7 },
 
@@ -257,7 +285,6 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		// flexDirection:row
 	},
 	backgroundImage: {
 		flex: 1,
@@ -316,6 +343,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	btn: {
-		alignSelf: 'flex-end',
+		backgroundColor: '#04366a',
+		borderRadius: 5,
+		padding: 5,
 	},
 });
