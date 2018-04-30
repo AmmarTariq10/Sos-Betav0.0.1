@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import Geolocation from 'react-native-geolocation-service';
+import Toast from 'react-native-easy-toast'
 export default class home extends Component {
 	state = {
 		data: {
@@ -58,6 +59,7 @@ export default class home extends Component {
 	componentDidMount() {
 		this._startAnimation();
 		this._locationRequest();
+		
 	}
 
 	render() {
@@ -96,13 +98,15 @@ export default class home extends Component {
 							</Animated.View>
 						</View>
 					</View>
-
+					<Toast 
+					ref="toast"/>
 					<View style={styles.btnContainer}>
 						<TouchableOpacity onPress={this._sosCall} activeOpacity={0.8}>
 							<View style={styles.redbox}>
 								<Image source={require('../../imgs/sos-btn.png')} style={styles.sostxt} />
 							</View>
 						</TouchableOpacity>
+						
 					</View>
 				</ImageBackground>
 			</View>
@@ -134,7 +138,7 @@ export default class home extends Component {
 				});
 			},
 			err => {
-				alert(err.message);
+				this.refs.toast.show(err.message);
 			},
 			{
 				enableHighAccuracy: true,
@@ -186,12 +190,12 @@ export default class home extends Component {
 				method: 'POST',
 				headers: header,
 				body: body,
-			})
+			}, err => {this.refs.toast.show(err)})
 				.then(res => res.json())
-				.then(resp => alert(JSON.stringify(resp)))
-				.catch(e => alert(e));
+				.then(resp => this.refs.toast.show(JSON.stringify(resp)))
+				.catch(e => this.refs.toast.show(e));
 		} else {
-			alert('Please Wait while the setup is getting ready');
+			this.refs.toast.show('Please Wait while the setup is getting ready');
 			this._locationRequest();
 		}
 
@@ -223,10 +227,10 @@ export default class home extends Component {
 							};
 						});
 					})
-					.catch(err => alert(err))
+					.catch(err => this.refs.toast.show(err))
 			)
 			.catch(err => {
-				alert(err.message);
+				this.refs.toast.show(err.message);
 			});
 		
 	};

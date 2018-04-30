@@ -13,33 +13,13 @@ import {
 	StatusBar,
 	ScrollView,
 	AsyncStorage,
+	ActivityIndicator
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import validate from '../../utility/validation';
-// import Toast from 'react-native-root-toast';
+import Toast from 'react-native-easy-toast'
 export default class login extends Component {
-	// componentDidMount(){
-	// 	let toast = Toast.show('This is a message', {
-	// 		duration: Toast.durations.LONG,
-	// 		position: Toast.positions.BOTTOM,
-	// 		shadow: true,
-	// 		animation: true,
-	// 		hideOnPress: true,
-	// 		delay: 0,
-	// 		onShow: () => {
-	// 			// calls on toast\`s appear animation start
-	// 		},
-	// 		onShown: () => {
-	// 			// calls on toast\`s appear animation end.
-	// 		},
-	// 		onHide: () => {
-	// 			// calls on toast\`s hide animation start.
-	// 		},
-	// 		onHidden: () => {
-	// 			// calls on toast\`s hide animation end.
-	// 		}
-	// 	});
-	// }
+	
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -52,105 +32,134 @@ export default class login extends Component {
 				memNo: '',
 			},
 			token: '',
+			isLoading:false
 		};
 	}
 
 	_changeTextHandlerFName = val => {
 		let isValid = validate(val, 'isName');
-		if (isValid) {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						fname: val,
-					},
-					fNameIsValid: true,
-				};
-			});
-			console.log('valid ' + JSON.stringify(this.state));
-		} else {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						fname: '',
-					},
-					fNameIsValid: false,
-				};
-			});
-			console.log('not valid' + JSON.stringify(this.state));
+		if(val === ''){
+			isValid = true
 		}
+		this.setState(prevState => {
+				return {
+					...prevState,
+					formData: {
+						...prevState.formData,
+						fname: val,
+					}
+				};
+			});
+
+		if(isValid){
+				this.setState(prevState => {
+					return{
+						...prevState,
+					fNameIsValid:true
+					}
+				})
+			}else{
+				this.setState(prevState => {
+					return{
+						...prevState,
+					fNameIsValid:false
+					}
+				})
+			}
 	};
 
 	_changeTextHandlerLName = val => {
 		let isValid = validate(val, 'isName');
-		if (isValid) {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						lname: val,
-					},
-					lNameIsValid: true,
-				};
-			});
-			console.log('valid ' + this.state.formData.lname);
-		} else {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						lname: '',
-					},
-					lNameIsValid: false,
-				};
-			});
-			console.log('not valid' + this.state);
+		if(val === ''){
+			isValid = true
 		}
+			this.setState(prevState => {
+				return {
+					...prevState,
+					formData: {
+						...prevState.formData,
+						lname: val,
+					}
+				};
+			});
+
+			if(isValid){
+				this.setState(prevState => {
+					return{
+						...prevState,
+					lNameIsValid:true
+					}
+				})
+			}else{
+				this.setState(prevState => {
+					return{
+						...prevState,
+					lNameIsValid:false
+					}
+				})
+			}
+	
 	};
 
 	_changeTextHandlerNumber = val => {
 		let isValid = validate(val, 'isNumber');
-		if (isValid) {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						memNo: val,
-					},
-					memIsValid: true,
-				};
-			});
-			console.log('valid ' + this.state.formData.memNo);
-		} else {
-			this.setState(prevState => {
-				return {
-					...prevState,
-					formData: {
-						memNo: '',
-					},
-					memIsValid: false,
-				};
-			});
+		if(val === ''){
+			isValid = true
 		}
-	};
+	this.setState(prevState => {
+				return {
+					...prevState,
+					formData: {
+					...prevState.formData,
+						memNo: val,
+					}
+				};
+			});
+			if(isValid){
+				this.setState(prevState => {
+					return{
+						...prevState,
+						memIsValid:true
+					}
+				})
+			}else{
+				this.setState(prevState => {
+					return{
+						...prevState,
+						memIsValid:false
+					}
+				})
+			}
+
+			console.log(JSON.stringify(this.state))
+		}
+
+	
 
 	render() {
 		let fNameIsValid = this.state.fNameIsValid;
-		fNameIsValid ? (inValidInputf = {}) : (inValidInputf = { backgroundColor: 'red' });
+		fNameIsValid ? (inValidInputf = {}) : (inValidInputf = { backgroundColor: 'red'});
 
 		let lNameIsValid = this.state.lNameIsValid;
-		lNameIsValid ? (inValidInputl = {}) : (inValidInputl = { backgroundColor: 'red' });
+		lNameIsValid ? (inValidInputl = {}) : (inValidInputl = { backgroundColor: 'red'});
 
 		let memIsValid = this.state.memIsValid;
-		memIsValid ? (inValidInputn = {}) : (inValidInputn = { backgroundColor: 'red' });
+		memIsValid ? (inValidInputn = {}) : (inValidInputn = { backgroundColor: 'red'});
 
+		let isLoading = this.state.isLoading
+
+		if(isLoading){
+			return(
+				<ImageBackground  source={require('../../imgs/bac.png')}  style={styles.backgroundImage}>
+				<ActivityIndicator size="large" color="black"   style={styles.loader}/>
+				</ImageBackground>
+			);
+		}else{
 		return (
-			<View style={styles.container}>
-				<StatusBar hidden={true} />
+			<View style={styles.container}>	
 				<ImageBackground source={require('../../imgs/bac.png')} style={styles.backgroundImage}>
-					<ScrollView style={styles.scrl}>
-						<KeyboardAvoidingView behavior="position">
+					<ScrollView ref={ref => listView = ref} style={styles.scrl}>
+						<KeyboardAvoidingView behavior="padding">
 							<View style={styles.content}>
 								<Image source={require('../../imgs/logo.png')} style={styles.logo} />
 								<View style={styles.inpContainer}>
@@ -162,7 +171,7 @@ export default class login extends Component {
 										keyboardType="default"
 										onChangeText={fname => this._changeTextHandlerFName(fname)}
 										value={this.state.fname}
-										ref={ref => (fNameDataInput = ref)}
+										ref={ref => (this._fNameDataInput = ref)}
 									/>
 									<TextInput
 										autoFocus={false}
@@ -172,7 +181,7 @@ export default class login extends Component {
 										keyboardType="default"
 										onChangeText={lname => this._changeTextHandlerLName(lname)}
 										value={this.state.lname}
-										ref={ref => (lNameDataInput = ref)}
+										ref={ ref => (this._lNameDataInput = ref)}
 									/>
 
 									<TextInput
@@ -182,31 +191,50 @@ export default class login extends Component {
 										placeholder="Member Number"
 										onChangeText={memNo => this._changeTextHandlerNumber(memNo)}
 										value={this.state.memNo}
-										ref={component => (this._textInput = component)}
+										ref={ component => (this._textInput = component)}
 									/>
 									<TouchableOpacity
 										onPress={this._loginHandler}
 										isDisabled={true}
-										style={styles.buttonContainer}
-									>
+										style={styles.buttonContainer}>
 										<Text style={styles.buttonText}>LOGIN</Text>
 									</TouchableOpacity>
 								</View>
 							</View>
 						</KeyboardAvoidingView>
 					</ScrollView>
+					<Toast 
+					ref="toast"
+					position="bottom"/>
 				</ImageBackground>
 			</View>
-		);
+		);}
 	}
 
 	_loginHandler = () => {
-		if (
-			this.state.memIsValid &&
-			this.state.lNameIsValid &&
-			this.state.memIsValid &&
-			this.state.formData.memNo != null
-		) {
+		console.log(JSON.stringify(this.state))	
+			
+		if(	this.state.formData.memNo != '' ||
+			this.state.formData.fname != '' ||
+			this.state.formData.lname != ''){
+			if(!this.state.fNameIsValid || !this.state.lNameIsValid || !this.state.memIsValid){
+				this.refs.toast.show('Please provide valid inputs')
+				this.setState({
+					fNameIsValid: true,
+					lNameIsValid: true,
+					memIsValid: true,
+					formData: {
+						fname: '',
+						laname: '',
+						memNo: '',
+					},
+					token: '',
+				})
+				this._textInput.setNativeProps({ text: '' });
+				this._fNameDataInput.setNativeProps({ text: '' });
+				this._lNameDataInput.setNativeProps({ text: '' });
+				return
+			}else{
 			let number = this.state.formData.memNo;
 			console.log(number);
 			baseURL = 'http://dev20.onlinetestingserver.com/sos-new/request-';
@@ -215,7 +243,12 @@ export default class login extends Component {
 			console.log(url);
 			console.log(body);
 			let token = null;
-
+			this.setState(prevState=>{
+				return{
+					...prevState,
+					isLoading:true
+				}
+			})
 			fetch(url, {
 				method: 'POST',
 				headers: {
@@ -234,26 +267,37 @@ export default class login extends Component {
 							navigatorStyle: { navBarHidden: true },
 						});
 					} else {
-						alert(number + ' is not a valid member');
+						this.setState(prevState=>{
+							return{
+								...prevState,
+								isLoading:false
+							}
+						})
+						this.refs.toast.show(number + 'is not a valid member number');
 						this._textInput.setNativeProps({ text: '' });
+						this._fNameDataInput.setNativeProps({ text: '' });
+						this._lNameDataInput.setNativeProps({ text: '' });
 					}
 				})
-				.then()
-				.catch(err => alert(err.message));
-		} else if (this.state.memIsValid || this.state.lNameIsValid || this.state.memIsValid) {
-			alert('please fill all the fields ');
+				.catch(err => this.refs.toast.show(err.message));
 		}
+	}else{
+			this.refs.toast.show('Please fill out any empty fields');	
+			return
+	}
 	};
+
 }
 
 const styles = StyleSheet.create({
-	statusBar: {
-		backgroundColor: '#064f9a',
-	},
+	
 	container: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	loader:{
+		
 	},
 	backgroundImage: {
 		flex: 1,
@@ -263,7 +307,7 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		flex: 1,
-		padding: 20,
+		padding: 30,
 		justifyContent: 'space-between',
 		alignItems: 'center',
 	},
@@ -275,10 +319,10 @@ const styles = StyleSheet.create({
 		height: 200,
 		resizeMode: Image.resizeMode.contain,
 		marginBottom: 20,
-		marginTop: 20,
+		marginTop: 0,
 	},
 	input: {
-		fontSize: 16,
+		fontSize: 20,
 		padding: 15,
 		marginBottom: 15,
 		backgroundColor: 'rgba(255,255,255,0.3)',
@@ -314,6 +358,6 @@ const styles = StyleSheet.create({
 	},
 	scrl: {
 		flex:1,
-		marginTop: 20,
+		marginTop: 0,
 	},
 });
